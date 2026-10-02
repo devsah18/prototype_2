@@ -24,10 +24,29 @@ async function loadDashboard() {
             analytics,
             graph
         ] = await Promise.all([
-            getJSON("/api/entities"),
-            getJSON("/api/relationships"),
-            getJSON("/api/analytics"),
-            getJSON("/api/graph")
+           const dashboardData = {
+    entities: [
+        { id: "P001", name: "Alex Morgan", type: "Person" },
+        { id: "P002", name: "Ravi Shah", type: "Person" },
+        { id: "P003", name: "Daniel Brooks", type: "Person" },
+        { id: "P004", name: "Maya Stone", type: "Person" },
+        { id: "O001", name: "Blue Harbor Logistics", type: "Organization" },
+        { id: "L001", name: "Warehouse 17", type: "Location" },
+        { id: "L002", name: "North District", type: "Location" }
+    ],
+
+    relationships: [
+        { source: "P001", target: "P002", type: "ASSOCIATED_WITH", weight: 4 },
+        { source: "P002", target: "P003", type: "ASSOCIATED_WITH", weight: 3 },
+        { source: "P001", target: "O001", type: "CONNECTED_TO", weight: 5 },
+        { source: "P003", target: "O001", type: "CONNECTED_TO", weight: 4 },
+        { source: "P004", target: "P001", type: "ASSOCIATED_WITH", weight: 2 },
+        { source: "P002", target: "L001", type: "VISITED", weight: 3 },
+        { source: "P003", target: "L001", type: "VISITED", weight: 3 },
+        { source: "P004", target: "L002", type: "VISITED", weight: 2 }
+    ]
+};
+
         ]);
 
 
@@ -422,4 +441,72 @@ document
     );
 
 
-loadDashboard();
+function loadDashboard() {
+
+    const data = dashboardData;
+
+    document.getElementById("entityCount").textContent =
+        data.entities.length;
+
+    document.getElementById("relationshipCount").textContent =
+        data.relationships.length;
+
+    document.getElementById("communityCount").textContent =
+        "3";
+
+    document.getElementById("density").textContent =
+        "0.38";
+
+
+    const nodes = data.entities.map(entity => ({
+        data: {
+            id: entity.id,
+            label: entity.name,
+            type: entity.type
+        }
+    }));
+
+
+    const edges = data.relationships.map(
+        (relationship, index) => ({
+            data: {
+                id: `edge-${index}`,
+                source: relationship.source,
+                target: relationship.target,
+                relationship: relationship.type,
+                weight: relationship.weight
+            }
+        })
+    );
+
+
+    renderGraph({
+        nodes: nodes,
+        edges: edges
+    });
+
+
+    renderEntities([
+        {
+            id: "P001",
+            name: "Alex Morgan",
+            score: 4.82
+        },
+        {
+            id: "O001",
+            name: "Blue Harbor Logistics",
+            score: 4.15
+        },
+        {
+            id: "P002",
+            name: "Ravi Shah",
+            score: 3.74
+        },
+        {
+            id: "P003",
+            name: "Daniel Brooks",
+            score: 3.42
+        }
+    ]);
+}
+
